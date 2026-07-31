@@ -29,6 +29,7 @@
     <module>modules/02-s3</module>
     <module>modules/03-dynamodb</module>
     <module>modules/04-sqs-sns</module>
+    <module>modules/05-lambda</module>
   </modules>
 
   <properties>
@@ -98,6 +99,24 @@
           <configuration>
             <excludedGroups>${excluded.groups}</excludedGroups>
           </configuration>
+        </plugin>
+        <!-- For modules whose integration tests need an artifact built by `package`
+             (e.g. Module 05's Lambda deployment jar) - failsafe runs after package,
+             unlike surefire which runs before it. -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-failsafe-plugin</artifactId>
+          <configuration>
+            <excludedGroups>${excluded.groups}</excludedGroups>
+          </configuration>
+          <executions>
+            <execution>
+              <goals>
+                <goal>integration-test</goal>
+                <goal>verify</goal>
+              </goals>
+            </execution>
+          </executions>
         </plugin>
       </plugins>
     </pluginManagement>
