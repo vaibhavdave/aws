@@ -26,6 +26,7 @@
   <modules>
     <module>modules/00-foundations</module>
     <module>modules/01-iam</module>
+    <module>modules/02-s3</module>
   </modules>
 
   <properties>
