@@ -53,7 +53,7 @@ public final class LambdaDemo {
             // the Lambda container Floci launches joins its network and can reach it there.
             // If your setup uses a different Floci hostname/network, adjust this.
             String functionArn = LambdaDeployer.deployOrUpdate(
-                    lambda, FUNCTION_NAME, jarBytes, roleResult.roleArn(),
+                    lambda, FUNCTION_NAME, "io.learnaws.lambda.FileMetadataHandler::handleRequest", jarBytes, roleResult.roleArn(),
                     Map.of("AWS_ENDPOINT_URL", "http://floci:4566"));
             System.out.println("Deployed function: " + functionArn);
 

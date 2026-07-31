@@ -1,0 +1,20 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "TaskTrackerTableFullCrud",
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:GetItem",
+        "dynamodb:PutItem",
+        "dynamodb:UpdateItem",
+        "dynamodb:DeleteItem",
+        "dynamodb:Query"
+      ],
+      "Resource": [
+        "arn:aws:dynamodb:us-east-1:000000000000:table/task-tracker",
+        "arn:aws:dynamodb:us-east-1:000000000000:table/task-tracker/index/*"
+      ]
+    }
+  ]
+}

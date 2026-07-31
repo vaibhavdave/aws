@@ -28,7 +28,8 @@ public final class LambdaDeployer {
 
     /** Creates the function if it doesn't exist yet, otherwise updates its code + config. */
     public static String deployOrUpdate(
-            LambdaClient lambda, String functionName, byte[] jarBytes, String roleArn, Map<String, String> environment) {
+            LambdaClient lambda, String functionName, String handler, byte[] jarBytes, String roleArn,
+            Map<String, String> environment) {
 
         boolean exists = functionExists(lambda, functionName);
 
@@ -36,7 +37,7 @@ public final class LambdaDeployer {
             lambda.createFunction(b -> b
                     .functionName(functionName)
                     .runtime(Runtime.JAVA21)
-                    .handler("io.learnaws.lambda.FileMetadataHandler::handleRequest")
+                    .handler(handler)
                     .role(roleArn)
                     .code(c -> c.zipFile(SdkBytes.fromByteArray(jarBytes)))
                     .environment(e -> e.variables(environment))

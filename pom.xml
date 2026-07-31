@@ -30,6 +30,7 @@
     <module>modules/03-dynamodb</module>
     <module>modules/04-sqs-sns</module>
     <module>modules/05-lambda</module>
+    <module>modules/06-api-gateway</module>
   </modules>
 
   <properties>

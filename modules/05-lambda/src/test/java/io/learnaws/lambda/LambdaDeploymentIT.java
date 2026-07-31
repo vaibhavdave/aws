@@ -67,7 +67,8 @@ class LambdaDeploymentIT {
 
         byte[] jarBytes = LambdaDeployer.readJar(Path.of("target", "lambda-file-processor.jar"));
         String functionArn = LambdaDeployer.deployOrUpdate(
-                lambda, FUNCTION_NAME, jarBytes, role.roleArn(), Map.of("AWS_ENDPOINT_URL", "http://floci:4566"));
+                lambda, FUNCTION_NAME, "io.learnaws.lambda.FileMetadataHandler::handleRequest", jarBytes, role.roleArn(),
+                Map.of("AWS_ENDPOINT_URL", "http://floci:4566"));
 
         S3NotificationWiring.wireBucketToLambda(s3, lambda, BUCKET_NAME, functionArn);
 
