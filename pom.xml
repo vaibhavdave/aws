@@ -33,6 +33,7 @@
     <module>modules/06-api-gateway</module>
     <module>modules/07-rds</module>
     <module>modules/08-elasticache</module>
+    <module>modules/09-ecs-ec2</module>
   </modules>
 
   <properties>
