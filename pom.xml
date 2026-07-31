@@ -36,6 +36,7 @@
     <module>modules/09-ecs-ec2</module>
     <module>modules/10-cdk-iac</module>
     <module>modules/11-testing-ci</module>
+    <module>capstone-cloudmart</module>
   </modules>
 
   <properties>

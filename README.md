@@ -75,7 +75,7 @@ mvn -pl modules/00-foundations -am clean test
 | 01 | [IAM & Security](modules/01-iam) | IAM, STS | Programmatic role/policy provisioning + assume-role |
 | 02 | [S3 Object Storage](modules/02-s3) | S3 | File Vault service (upload/download/presign/versioning) |
 | 03 | [DynamoDB](modules/03-dynamodb) | DynamoDB, Streams | Task Tracker data layer |
-| 04 | [SQS & SNS](modules/04-sqs-sns) | SQS, SNS | Order pipeline with fan-out + DLQ |
+| 04 | [SQS & SNS](modules/04-sqs-sns) | SQS, SNS | Task event fan-out (SNS -> SQS) with a filter policy + DLQ |
 | 05 | [Lambda](modules/05-lambda) | Lambda, S3 events | S3-triggered metadata processor |
 | 06 | [API Gateway + Lambda](modules/06-api-gateway) | API Gateway, Lambda, DynamoDB | Task Tracker REST API |
 | 07 | [RDS](modules/07-rds) | RDS (Postgres) | Relational Users table + polyglot join |
@@ -86,4 +86,15 @@ mvn -pl modules/00-foundations -am clean test
 | — | [Capstone: CloudMart](capstone-cloudmart) | All of the above | End-to-end serverless mini e-commerce platform |
 
 Work through them in order — later modules reuse services and code from earlier ones
-(the Task Tracker built in Module 03 keeps growing all the way to the capstone).
+(the Task Tracker built in Module 03 keeps growing all the way through Module 11; the
+capstone applies the same patterns to a second, independent domain).
+
+Modules 10 and the capstone's CDK stack additionally need Node.js and the `aws-cdk` CLI
+(`npm install -g aws-cdk`) if you want to actually `cdk deploy` rather than just run their
+tests — see each one's README for details.
+
+## CI
+
+`.github/workflows/ci.yml` runs the whole reactor's unit tests and packages every module,
+then starts Floci and runs the full `-Pfloci` integration suite - see
+[Module 11](modules/11-testing-ci) for how it's put together.
