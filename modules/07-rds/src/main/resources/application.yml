@@ -1,0 +1,14 @@
+server:
+  port: 8087
+
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+
+# spring.datasource.* is deliberately absent here - RdsUsersApplication provisions the
+# RDS instance first and sets it as a system property before Spring's context starts,
+# since the host/port aren't known until Floci finishes creating the Postgres container.
