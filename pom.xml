@@ -32,6 +32,7 @@
     <module>modules/05-lambda</module>
     <module>modules/06-api-gateway</module>
     <module>modules/07-rds</module>
+    <module>modules/08-elasticache</module>
   </modules>
 
   <properties>
