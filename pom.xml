@@ -25,6 +25,7 @@
 
   <modules>
     <module>modules/00-foundations</module>
+    <module>modules/01-iam</module>
   </modules>
 
   <properties>
