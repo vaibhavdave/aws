@@ -28,6 +28,7 @@
     <module>modules/01-iam</module>
     <module>modules/02-s3</module>
     <module>modules/03-dynamodb</module>
+    <module>modules/04-sqs-sns</module>
   </modules>
 
   <properties>
