@@ -1,0 +1,15 @@
+services:
+  floci:
+    image: floci/floci:latest
+    container_name: floci
+    ports:
+      - "4566:4566"
+    environment:
+      # hybrid = in-memory speed with async flush every 5s, so table/bucket state
+      # survives a container restart between study sessions without any extra setup.
+      - FLOCI_STORAGE_MODE=hybrid
+    volumes:
+      # Required for the modules that use real Docker-backed services
+      # (Lambda, RDS, ElastiCache, ECS) - Floci launches sibling containers via this socket.
+      - /var/run/docker.sock:/var/run/docker.sock
+    user: root

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>io.learnaws</groupId>
+  <artifactId>aws-floci-curriculum</artifactId>
+  <version>1.0.0</version>
+  <packaging>pom</packaging>
+
+  <name>AWS + Floci + Java Curriculum</name>
+  <description>
+    A hands-on curriculum for learning AWS with Java, using Floci (a local AWS emulator)
+    instead of a real AWS account. Each module under modules/ is a self-contained Maven
+    project with theory notes and runnable, tested code.
+  </description>
+
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>3.4.1</version>
+    <relativePath/>
+  </parent>
+
+  <modules>
+    <module>modules/00-foundations</module>
+  </modules>
+
+  <properties>
+    <java.version>21</java.version>
+    <maven.compiler.source>21</maven.compiler.source>
+    <maven.compiler.target>21</maven.compiler.target>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <!-- Shared versions for every module in the reactor -->
+    <aws-sdk.version>2.29.52</aws-sdk.version>
+    <testcontainers.version>1.20.4</testcontainers.version>
+    <testcontainers-floci.version>1.4.0</testcontainers-floci.version>
+
+    <!-- Tests tagged @Tag("floci") need a live Floci instance (docker compose up) and are
+         excluded by default. Run `mvn test -Pfloci` after starting Floci to include them. -->
+    <excluded.groups>floci</excluded.groups>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <!-- AWS SDK v2 BOM: pulls consistent versions for every AWS client used across modules -->
+      <dependency>
+        <groupId>software.amazon.awssdk</groupId>
+        <artifactId>bom</artifactId>
+        <version>${aws-sdk.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
+      <!-- Testcontainers BOM -->
+      <dependency>
+        <groupId>org.testcontainers</groupId>
+        <artifactId>testcontainers-bom</artifactId>
+        <version>${testcontainers.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
+      <!-- Floci's own Testcontainers module: spins up a real Floci instance per test class -->
+      <dependency>
+        <groupId>io.floci</groupId>
+        <artifactId>testcontainers-floci</artifactId>
+        <version>${testcontainers-floci.version}</version>
+        <scope>test</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <!-- Every module inherits JUnit 5 + AssertJ (via spring-boot-starter-test) and can tag
+       integration tests that need a live Floci instance with @Tag("floci") so plain
+       `mvn test` stays fast, and `mvn test -Pfloci` runs the full suite. -->
+  <profiles>
+    <profile>
+      <id>floci</id>
+      <properties>
+        <excluded.groups></excluded.groups>
+      </properties>
+    </profile>
+  </profiles>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <configuration>
+            <excludedGroups>${excluded.groups}</excludedGroups>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+</project>
