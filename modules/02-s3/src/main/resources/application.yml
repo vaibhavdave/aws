@@ -1,0 +1,5 @@
+server:
+  port: 8082
+
+file-vault:
+  bucket-name: task-tracker-files

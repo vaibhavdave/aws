@@ -1,0 +1,36 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ProductAndOrderTableAccess",
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:GetItem",
+        "dynamodb:PutItem",
+        "dynamodb:UpdateItem",
+        "dynamodb:Query",
+        "dynamodb:Scan"
+      ],
+      "Resource": [
+        "arn:aws:dynamodb:us-east-1:000000000000:table/cloudmart-products",
+        "arn:aws:dynamodb:us-east-1:000000000000:table/cloudmart-orders",
+        "arn:aws:dynamodb:us-east-1:000000000000:table/cloudmart-orders/index/*"
+      ]
+    },
+    {
+      "Sid": "ProductImageAccess",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:PutObject"
+      ],
+      "Resource": "arn:aws:s3:::cloudmart-product-images/*"
+    },
+    {
+      "Sid": "PublishOrderEvents",
+      "Effect": "Allow",
+      "Action": "sns:Publish",
+      "Resource": "arn:aws:sns:us-east-1:000000000000:cloudmart-order-events"
+    }
+  ]
+}
