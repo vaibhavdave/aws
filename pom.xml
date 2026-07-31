@@ -34,6 +34,7 @@
     <module>modules/07-rds</module>
     <module>modules/08-elasticache</module>
     <module>modules/09-ecs-ec2</module>
+    <module>modules/10-cdk-iac</module>
   </modules>
 
   <properties>
