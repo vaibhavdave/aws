@@ -45,6 +45,7 @@ public final class CloudMartApiGatewayAdmin {
 
         apiGateway.createDeployment(b -> b.restApiId(restApiId).stageName("prod"));
 
+        // Floci's documented v1 REST API execute-plane URL - see Module 06's ApiGatewayAdmin.
         String invokeBaseUrl = flociBaseUrl + "/restapis/" + restApiId + "/prod/_user_request_";
         return new Resources(restApiId, invokeBaseUrl);
     }

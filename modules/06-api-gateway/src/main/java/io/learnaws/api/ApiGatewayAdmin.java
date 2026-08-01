@@ -55,8 +55,9 @@ public final class ApiGatewayAdmin {
 
         apiGateway.createDeployment(b -> b.restApiId(restApiId).stageName("prod"));
 
-        // LocalStack-style local invoke URL convention, which Floci mirrors for drop-in
-        // compatibility: {base}/restapis/{restApiId}/{stage}/_user_request_{resourcePath}
+        // Floci's documented v1 REST API execute-plane URL:
+        // {base}/restapis/{restApiId}/{stage}/_user_request_{resourcePath}
+        // (see https://github.com/floci-io/floci/blob/main/docs/services/api-gateway.md)
         String invokeBaseUrl = flociBaseUrl + "/restapis/" + restApiId + "/prod/_user_request_";
 
         return new Resources(restApiId, invokeBaseUrl);
