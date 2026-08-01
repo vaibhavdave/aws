@@ -42,34 +42,16 @@ public final class ElastiCacheProvisioner {
 
         elastiCache.waiter().waitUntilReplicationGroupAvailable(b -> b.replicationGroupId(REPLICATION_GROUP_ID));
 
-        // The waiter's "available" match is on the group's top-level status; Floci appears to
-        // flip that slightly before the node group (and its endpoint) is attached to the same
-        // record - confirmed by CI hitting an empty nodeGroups list immediately after the
-        // waiter returned, with the Valkey container's own "starting" log line only ~200ms
-        // earlier. Poll describeReplicationGroups directly rather than trusting one call.
-        ReplicationGroup group = null;
-        for (int attempt = 0; attempt < 10; attempt++) {
-            group = elastiCache.describeReplicationGroups(b -> b.replicationGroupId(REPLICATION_GROUP_ID))
-                    .replicationGroups()
-                    .get(0);
-            if (!group.nodeGroups().isEmpty()) {
-                break;
-            }
-            System.out.println("[diagnostic] replication group " + REPLICATION_GROUP_ID
-                    + " has status=" + group.status() + " but an empty nodeGroups list (attempt " + attempt + ")");
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException interrupted) {
-                Thread.currentThread().interrupt();
-                throw new IllegalStateException(interrupted);
-            }
-        }
-        if (group.nodeGroups().isEmpty()) {
-            throw new IllegalStateException(
-                    "Replication group " + REPLICATION_GROUP_ID + " never reported a node group: " + group);
-        }
+        ReplicationGroup group = elastiCache.describeReplicationGroups(b -> b.replicationGroupId(REPLICATION_GROUP_ID))
+                .replicationGroups()
+                .get(0);
 
-        var endpoint = group.nodeGroups().get(0).primaryEndpoint();
+        // Real AWS puts the connection endpoint on NodeGroups[0].PrimaryEndpoint for a
+        // non-cluster-mode group; Floci instead leaves NodeGroups empty and reports it on the
+        // group's own ConfigurationEndpoint (confirmed via CI: ClusterEnabled=false yet
+        // ConfigurationEndpoint=Endpoint(Address=localhost, Port=6379) while NodeGroups stayed
+        // empty even after 10s of polling - ruling out a propagation race).
+        var endpoint = group.configurationEndpoint();
         return new ConnectionInfo(endpoint.address(), endpoint.port());
     }
 }
