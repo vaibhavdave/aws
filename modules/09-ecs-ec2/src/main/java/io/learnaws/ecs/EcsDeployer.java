@@ -80,6 +80,27 @@ public final class EcsDeployer {
     }
 
     public static void waitUntilStable(EcsClient ecs) {
-        ecs.waiter().waitUntilServicesStable(b -> b.cluster(CLUSTER_NAME).services(SERVICE_NAME));
+        // The SDK's built-in waiter also requires every deployment's rolloutState to reach
+        // COMPLETED; CI hit its 40-attempt (10 minute) timeout even though the task's own
+        // container logs showed the app fully up within seconds - diagnostic evidence needed
+        // to tell whether Floci ever sets rolloutState at all. Poll runningCount/desiredCount
+        // and deployment state directly (bounded, with logging) instead of trusting the waiter.
+        for (int attempt = 0; attempt < 30; attempt++) {
+            Service service = ecs.describeServices(b -> b.cluster(CLUSTER_NAME).services(SERVICE_NAME))
+                    .services()
+                    .get(0);
+            System.out.println("[diagnostic] ecs service " + SERVICE_NAME + " (attempt " + attempt + "): " + service);
+            if (service.runningCount().equals(service.desiredCount())) {
+                return;
+            }
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException interrupted) {
+                Thread.currentThread().interrupt();
+                throw new IllegalStateException(interrupted);
+            }
+        }
+        throw new IllegalStateException(
+                "Service " + SERVICE_NAME + " never reached runningCount == desiredCount within 30s");
     }
 }
