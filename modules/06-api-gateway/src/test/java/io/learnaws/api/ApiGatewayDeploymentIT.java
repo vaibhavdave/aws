@@ -1,7 +1,6 @@
 package io.learnaws.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -9,7 +8,6 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
 import java.nio.file.Path;
-import java.time.Duration;
 import java.util.Map;
 import java.util.UUID;
 
@@ -55,18 +53,23 @@ class ApiGatewayDeploymentIT {
         ApiGatewayAdmin.Resources api = ApiGatewayAdmin.bootstrap(
                 apiGateway, lambda, functionArn, floci.getRegion(), floci.getEndpoint().toString());
 
+        // Diagnostic dump: two prior CI attempts fixing this test's 404 (a suspected wrong
+        // invoke URL, then a suspected deployment-propagation race) both turned out to be
+        // wrong guesses. Rather than guess a third time, print what Floci actually thinks
+        // is configured, plus the real response body (not just the status code), so the
+        // next CI run's log tells us the real cause instead of another blind assertion.
+        System.out.println("[diagnostic] restApiId=" + api.restApiId() + " invokeBaseUrl=" + api.invokeBaseUrl());
+        apiGateway.getResources(b -> b.restApiId(api.restApiId()).embed("methods"))
+                .items()
+                .forEach(r -> System.out.println("[diagnostic] resource: " + r));
+
         HttpClient http = HttpClient.newHttpClient();
         String owner = "owner-" + UUID.randomUUID();
         URI tasksUri = URI.create(api.invokeBaseUrl() + "/tasks");
 
-        // The deployment API call returning doesn't guarantee the execute-plane has
-        // finished wiring up the new stage yet - poll a side-effect-free GET until it
-        // stops 404ing before running the real (state-changing) test flow below.
-        await().atMost(Duration.ofSeconds(15)).pollInterval(Duration.ofSeconds(1)).until(() -> {
-            HttpResponse<String> probe = http.send(
-                    HttpRequest.newBuilder(tasksUri).GET().build(), HttpResponse.BodyHandlers.ofString());
-            return probe.statusCode() != 404;
-        });
+        HttpResponse<String> probe = http.send(
+                HttpRequest.newBuilder(tasksUri).GET().build(), HttpResponse.BodyHandlers.ofString());
+        System.out.println("[diagnostic] GET " + tasksUri + " -> " + probe.statusCode() + " " + probe.body());
 
         HttpResponse<String> created = http.send(
                 HttpRequest.newBuilder(tasksUri)
