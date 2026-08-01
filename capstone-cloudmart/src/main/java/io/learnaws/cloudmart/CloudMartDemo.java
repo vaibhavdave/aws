@@ -88,18 +88,6 @@ public final class CloudMartDemo {
             System.out.println("REST API base URL: " + api.invokeBaseUrl());
 
             HttpClient http = HttpClient.newHttpClient();
-            URI productsUri = URI.create(api.invokeBaseUrl() + "/products");
-
-            // See Module 06's ApiGatewayDemo: the deployment call returning doesn't
-            // guarantee the execute-plane has finished wiring up the new stage yet.
-            for (int attempt = 0; attempt < 15; attempt++) {
-                HttpResponse<String> probe = http.send(
-                        HttpRequest.newBuilder(productsUri).GET().build(), HttpResponse.BodyHandlers.ofString());
-                if (probe.statusCode() != 404) {
-                    break;
-                }
-                Thread.sleep(1000);
-            }
 
             HttpResponse<String> product = http.send(
                     HttpRequest.newBuilder(URI.create(api.invokeBaseUrl() + "/products"))

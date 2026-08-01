@@ -44,18 +44,6 @@ public final class ApiGatewayDemo {
             HttpClient http = HttpClient.newHttpClient();
             URI tasksUri = URI.create(api.invokeBaseUrl() + "/tasks");
 
-            // The deployment call returning doesn't guarantee the execute-plane has
-            // finished wiring up the new stage yet - poll a side-effect-free GET until
-            // it stops 404ing before making the real calls below.
-            for (int attempt = 0; attempt < 15; attempt++) {
-                HttpResponse<String> probe = http.send(
-                        HttpRequest.newBuilder(tasksUri).GET().build(), HttpResponse.BodyHandlers.ofString());
-                if (probe.statusCode() != 404) {
-                    break;
-                }
-                Thread.sleep(1000);
-            }
-
             HttpResponse<String> created = http.send(
                     HttpRequest.newBuilder(tasksUri)
                             .header("Content-Type", "application/json")

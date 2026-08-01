@@ -43,7 +43,10 @@ public final class CloudMartApiGatewayAdmin {
 
         grantApiGatewayInvokePermission(lambda, functionArn, region, restApiId);
 
-        apiGateway.createDeployment(b -> b.restApiId(restApiId).stageName("prod"));
+        // CreateDeployment's stageName parameter doesn't provision a queryable Stage on
+        // Floci's execute-plane - see Module 06's ApiGatewayAdmin for the confirmed cause.
+        String deploymentId = apiGateway.createDeployment(b -> b.restApiId(restApiId)).id();
+        apiGateway.createStage(b -> b.restApiId(restApiId).stageName("prod").deploymentId(deploymentId));
 
         // Floci's documented v1 REST API execute-plane URL - see Module 06's ApiGatewayAdmin.
         String invokeBaseUrl = flociBaseUrl + "/restapis/" + restApiId + "/prod/_user_request_";

@@ -53,23 +53,9 @@ class ApiGatewayDeploymentIT {
         ApiGatewayAdmin.Resources api = ApiGatewayAdmin.bootstrap(
                 apiGateway, lambda, functionArn, floci.getRegion(), floci.getEndpoint().toString());
 
-        // Diagnostic dump: two prior CI attempts fixing this test's 404 (a suspected wrong
-        // invoke URL, then a suspected deployment-propagation race) both turned out to be
-        // wrong guesses. Rather than guess a third time, print what Floci actually thinks
-        // is configured, plus the real response body (not just the status code), so the
-        // next CI run's log tells us the real cause instead of another blind assertion.
-        System.out.println("[diagnostic] restApiId=" + api.restApiId() + " invokeBaseUrl=" + api.invokeBaseUrl());
-        apiGateway.getResources(b -> b.restApiId(api.restApiId()).embed("methods"))
-                .items()
-                .forEach(r -> System.out.println("[diagnostic] resource: " + r));
-
         HttpClient http = HttpClient.newHttpClient();
         String owner = "owner-" + UUID.randomUUID();
         URI tasksUri = URI.create(api.invokeBaseUrl() + "/tasks");
-
-        HttpResponse<String> probe = http.send(
-                HttpRequest.newBuilder(tasksUri).GET().build(), HttpResponse.BodyHandlers.ofString());
-        System.out.println("[diagnostic] GET " + tasksUri + " -> " + probe.statusCode() + " " + probe.body());
 
         HttpResponse<String> created = http.send(
                 HttpRequest.newBuilder(tasksUri)
