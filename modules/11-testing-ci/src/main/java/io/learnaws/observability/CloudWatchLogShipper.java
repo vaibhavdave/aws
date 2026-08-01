@@ -42,7 +42,11 @@ public final class CloudWatchLogShipper {
                         .toList()));
     }
 
-    /** filterPattern uses CloudWatch Logs' own filter pattern syntax, e.g. {"$.level = \"ERROR\""}. */
+    /**
+     * Real AWS's filterPattern syntax supports JSON metric-filter expressions like
+     * {@code { $.level = "ERROR" }}; Floci only matches filterPattern as a plain substring
+     * of the message, so callers targeting Floci should pass a literal substring instead.
+     */
     public static List<String> query(CloudWatchLogsClient logs, String logGroup, String filterPattern) {
         List<FilteredLogEvent> events = logs.filterLogEvents(b -> b
                         .logGroupName(logGroup)

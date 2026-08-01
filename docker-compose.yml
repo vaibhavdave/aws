@@ -4,6 +4,8 @@ services:
     container_name: floci
     ports:
       - "4566:4566"
+      - "7001-7099:7001-7099"   # RDS proxy ports (Module 07)
+      - "6379-6399:6379-6399"   # ElastiCache proxy ports (Module 08)
     environment:
       # hybrid = in-memory speed with async flush every 5s, so table/bucket state
       # survives a container restart between study sessions without any extra setup.

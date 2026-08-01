@@ -53,10 +53,16 @@ public final class ApiGatewayAdmin {
 
         grantApiGatewayInvokePermission(lambda, functionArn, region, restApiId);
 
-        apiGateway.createDeployment(b -> b.restApiId(restApiId).stageName("prod"));
+        // CreateDeployment's stageName parameter is a real-AWS convenience that also
+        // creates the Stage; Floci's execute-plane doesn't treat it that way (confirmed by
+        // hitting the deployed API and getting {"message":"Stage not found"} despite the
+        // deployment existing) - CreateStage against the new deployment id is required.
+        String deploymentId = apiGateway.createDeployment(b -> b.restApiId(restApiId)).id();
+        apiGateway.createStage(b -> b.restApiId(restApiId).stageName("prod").deploymentId(deploymentId));
 
-        // LocalStack-style local invoke URL convention, which Floci mirrors for drop-in
-        // compatibility: {base}/restapis/{restApiId}/{stage}/_user_request_{resourcePath}
+        // Floci's documented v1 REST API execute-plane URL:
+        // {base}/restapis/{restApiId}/{stage}/_user_request_{resourcePath}
+        // (see https://github.com/floci-io/floci/blob/main/docs/services/api-gateway.md)
         String invokeBaseUrl = flociBaseUrl + "/restapis/" + restApiId + "/prod/_user_request_";
 
         return new Resources(restApiId, invokeBaseUrl);

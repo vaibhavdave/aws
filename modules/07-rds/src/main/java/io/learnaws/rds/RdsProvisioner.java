@@ -1,7 +1,7 @@
 package io.learnaws.rds;
 
 import software.amazon.awssdk.services.rds.RdsClient;
-import software.amazon.awssdk.services.rds.model.DbInstanceNotFoundException;
+import software.amazon.awssdk.services.rds.model.DbInstanceAlreadyExistsException;
 import software.amazon.awssdk.services.rds.model.DBInstance;
 
 /**
@@ -26,7 +26,11 @@ public final class RdsProvisioner {
     }
 
     public static ConnectionInfo provision(RdsClient rds) {
-        if (!instanceExists(rds)) {
+        // Try-create-and-catch-the-conflict, the same idiom every other Admin class in this
+        // repo uses (see TaskTableAdmin) - a describe-first check doesn't work here because
+        // Floci's DescribeDBInstances doesn't reject a never-created identifier, so a
+        // describe-then-create-if-missing check silently skips creation on a fresh instance.
+        try {
             rds.createDBInstance(b -> b
                     .dbInstanceIdentifier(INSTANCE_ID)
                     .engine("postgres")
@@ -35,6 +39,8 @@ public final class RdsProvisioner {
                     .masterUsername(USERNAME)
                     .masterUserPassword(PASSWORD)
                     .dbName(DATABASE_NAME));
+        } catch (DbInstanceAlreadyExistsException alreadyExists) {
+            // already provisioned on a previous run
         }
 
         rds.waiter().waitUntilDBInstanceAvailable(b -> b.dbInstanceIdentifier(INSTANCE_ID));
@@ -45,14 +51,5 @@ public final class RdsProvisioner {
 
         return new ConnectionInfo(
                 instance.endpoint().address(), instance.endpoint().port(), DATABASE_NAME, USERNAME, PASSWORD);
-    }
-
-    private static boolean instanceExists(RdsClient rds) {
-        try {
-            rds.describeDBInstances(b -> b.dbInstanceIdentifier(INSTANCE_ID));
-            return true;
-        } catch (DbInstanceNotFoundException notFound) {
-            return false;
-        }
     }
 }

@@ -32,11 +32,13 @@ on every cached task.
 
 `CachedTaskService` wraps Module 03's `TaskRepository` with a Redis-backed
 cache-aside layer using **Jedis** (specifically `UnifiedJedis`, its modern
-synchronous client). `ElastiCacheProvisioner` creates a single-node cache
-cluster via `CreateCacheCluster`, waits for it, and reads back the node's
-host/port from `DescribeCacheClusters` — Floci runs this as a real
-`valkey/valkey:8` container, so it's the actual Redis wire protocol underneath,
-not a mock of it.
+synchronous client). `ElastiCacheProvisioner` creates a single-node Redis
+replication group via `CreateReplicationGroup` (real AWS's `CreateCacheCluster`
+only ever provisions memcached — Redis/Valkey always goes through
+`CreateReplicationGroup`, even for a single node), waits for it, and reads back
+the node's host/port from `DescribeReplicationGroups` — Floci runs this as a
+real `valkey/valkey:8` container, so it's the actual Redis wire protocol
+underneath, not a mock of it.
 
 ```
 GET   /api/tasks/{id}   returns the task plus whether it was a cache hit and how long the lookup took
