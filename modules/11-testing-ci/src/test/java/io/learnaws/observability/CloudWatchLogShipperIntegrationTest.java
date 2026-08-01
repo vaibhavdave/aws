@@ -44,7 +44,11 @@ class CloudWatchLogShipperIntegrationTest {
         CloudWatchLogShipper.ship(logs, logGroup, logStream, List.of(info, error));
 
         await().atMost(Duration.ofSeconds(10)).untilAsserted(() -> {
-            List<String> errorMessages = CloudWatchLogShipper.query(logs, logGroup, "{ $.level = \"ERROR\" }");
+            // Real AWS's JSON filter-pattern syntax ({ $.level = "ERROR" }) isn't parsed by
+            // Floci - it matches --filter-pattern as a plain substring of the message (see
+            // Floci's own CloudWatch docs) - so filter on a substring that appears only in
+            // the error event's serialized JSON.
+            List<String> errorMessages = CloudWatchLogShipper.query(logs, logGroup, "\"level\":\"ERROR\"");
             assertThat(errorMessages).hasSize(1);
             assertThat(errorMessages.get(0)).contains("something broke").contains("\"taskId\":\"t2\"");
         });

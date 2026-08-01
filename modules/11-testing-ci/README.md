@@ -50,8 +50,12 @@ structured fields you logged.
   `timestamp`/`level`/`component`/`message`/`fields`, printed to stdout.
 - **`CloudWatchLogShipper`** — ships a batch of those events into a Floci
   CloudWatch Logs group/stream, then queries them back with a filter
-  pattern (`{ $.level = "ERROR" }`) - proving the structure survives the
-  round trip and is actually queryable, not just readable.
+  pattern - proving the structure survives the round trip and is actually
+  queryable, not just readable. Real AWS's JSON filter-pattern syntax
+  (`{ $.level = "ERROR" }`) isn't parsed by Floci, which matches
+  `filterPattern` as a plain substring of the message instead, so the test
+  filters on a substring (`"level":"ERROR"`) that only the error event's
+  JSON contains.
 - **`.github/workflows/ci.yml`** (repo root) — the CI pipeline: unit tests +
   packaging first (fast signal, and it's what produces every module's jars),
   then builds Module 09's container image, starts Floci, waits for it, and
